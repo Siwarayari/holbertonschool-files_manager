@@ -11,19 +11,23 @@ class RedisClient {
         });
     }
 
+
     isAlive() {
-        return !this.client.connected;
+        return this.client.connected;
     }
+
 
     async get(key) {
         const getAsync = util.promisify(this.client.get).bind(this.client);
         return await getAsync(key);
     }
 
+
     async set(key, value, duration) {
         const setAsync = util.promisify(this.client.setex).bind(this.client);
         await setAsync(key, duration, value);
     }
+
 
     async del(key) {
         const delAsync = util.promisify(this.client.del).bind(this.client);
