@@ -1,38 +1,33 @@
-import redis from 'redis';
 import util from 'util';
+import redis from 'redis';
 
 class RedisClient {
-    constructor() {
-        this.client = redis.createClient();
+  constructor() {
+    this.client = redis.createClient();
 
-        // Display errors in the console
-        this.client.on('error', (err) => {
-            console.error('Redis Error:', err);
-        });
-    }
+    // Display errors in the console
+    this.client.on('error', (err) => {
+      console.error('Redis Error:', err);
+    });
+  }
 
+  isAlive() {
+    return this.client.connected;
+  }
 
-    isAlive() {
-        return this.client.connected;
-    }
+  async get(key) {
+    return util.promisify(this.client.get)
+      .bind(this.client)(key);
+  }
 
+  async set(key, value, duration) {
+    this.client.set(key, value);
+    this.client.expire(key, duration);
+  }
 
-    async get(key) {
-        const getAsync = util.promisify(this.client.get).bind(this.client);
-        return await getAsync(key);
-    }
-
-
-    async set(key, value, duration) {
-        const setAsync = util.promisify(this.client.setex).bind(this.client);
-        await setAsync(key, duration, value);
-    }
-
-
-    async del(key) {
-        const delAsync = util.promisify(this.client.del).bind(this.client);
-        await delAsync(key);
-    }
+  async del(key) {
+    this.client.del(key);
+  }
 }
 
 const redisClient = new RedisClient();
