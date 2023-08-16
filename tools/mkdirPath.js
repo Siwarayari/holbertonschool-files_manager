@@ -9,12 +9,13 @@ const filePath = async (name, data, type) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  const path = `${dir}/${name}`;
+  const path = `/tmp/files_manager/${name}`;
   let cls = Buffer.from(data, 'base64');
   if (type !== 'image') cls = cls.toString('utf-8');
   fs.writeFile(path, cls, (err) => {
     if (err) throw err;
   });
+  return path;
 };
 
 export default filePath;
