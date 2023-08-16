@@ -34,13 +34,10 @@ const postUpload = async (req, res) => {
       file.data = data;
       file.path = filePath(uuidv4(), data, type);
     }
-    const newFile = await uploadFiles(file);
-    delete newFile.data;
-    delete newFile.path;
-    return res.status(201).json(newFile);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: 'Server error' });
+    const result = await uploadFiles(file);
+    return res.status(201).send(result);
+  } catch (err) {
+    return res.status(500).send({ error: err.message });
   }
 };
 export default postUpload;
