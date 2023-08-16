@@ -1,8 +1,4 @@
 import fs from 'fs';
-// create file at the root
-// create folder inside a folder
-// create a file at the root
-// create a file inside a folder
 
 const filePath = async (name, data, type) => {
   const dir = process.env.FOLDER_PATH || '/tmp/files_manager';
