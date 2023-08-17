@@ -27,7 +27,7 @@ class RedisClient {
   async del(key) {
     this.client.del(key);
   }
-};
+}
 
 const redisClient = new RedisClient();
 

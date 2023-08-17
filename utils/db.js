@@ -29,6 +29,15 @@ class DBClient {
   async nbFiles() {
     return this.db.collection('files').countDocuments();
   }
+
+  async findFiles(data) {
+    return this.db.collection('files').findOne(data);
+  }
+
+  async uploadFiles(data) {
+    await this.db.collection('files').insertOne(data);
+    return this.db.collection('files').findOne(data);
+  }
 }
 
 const dbClient = new DBClient();
