@@ -1,7 +1,7 @@
 import { getStats, getStatus } from '../controllers/AppController';
 import { postNew, getMe } from '../controllers/UsersController';
 import { getConnect, getDisconnect } from '../controllers/AuthController';
-import postUpload from '../controllers/FilesController'
+import postUpload from '../controllers/FilesController';
 
 const express = require('express');
 
