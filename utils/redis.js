@@ -4,11 +4,8 @@ import redis from 'redis';
 class RedisClient {
   constructor() {
     this.client = redis.createClient();
-    this.client.get = promisify(this.client.get).bind(this.client);
-    this.client.set = promisify(this.client.set).bind(this.client);
-    this.client.expire = promisify(this.client.expire).bind(this.client);
-    this.client.del = promisify(this.client.del).bind(this.client);
-    this.client.on('error', (err) => console.log(`${err.message}`));
+    this.get = promisify(this.client.get)
+      .bind(this.client);
   }
 
   isAlive() {
@@ -16,7 +13,7 @@ class RedisClient {
   }
 
   async get(key) {
-    return this.client.get(key);
+    return this.get(key, (err, reply) => reply);
   }
 
   async set(key, value, duration) {
@@ -25,7 +22,16 @@ class RedisClient {
   }
 
   async del(key) {
-    this.client.del(key);
+    return this.client.del(key);
+  }
+
+  async getUserIdAndKey(request) {
+    const obj = { userId: null, key: null };
+    const token = request.header('X-Token');
+    if (!token) return obj;
+    obj.key = `auth_${token}`;
+    obj.userId = await this.get(obj.key);
+    return obj;
   }
 }
 
