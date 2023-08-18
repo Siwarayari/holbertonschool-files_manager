@@ -1,10 +1,11 @@
 import fs from 'fs';
+import { v4 as uuidV4 } from 'uuid';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
 const { ObjectId } = require('mongodb').ObjectId;
 const Bill = require('bull');
-const { v4: uuidV4 } = require('uuid');
+
 
 class FilesController {
   static async postUpload(req, res) {
@@ -49,7 +50,6 @@ class FilesController {
     }
     const pathDir = process.env.FOLDER_PATH || '/tmp/files_manager';
     const fileId = uuidV4();
-
     const buff = Buffer.from(fileData, 'base64');
     const pathFile = `${pathDir}/${fileId}`;
     await fs.mkdir(pathDir, { recursive: true }, (err) => {
@@ -114,7 +114,9 @@ class FilesController {
     const limit = req.query.limit || 20;
     const query = { userId: usr._id, parentId };
     if (parentId === 0) query.parentId = 0;
-    const files = await dbClient.db.collection('files').find(query).skip(page * limit).limit(limit).toArray();
+    const files = await dbClient.db.collection('files').find(query).skip(page * limit)
+      .limit(limit)
+      .toArray();
     return res.status(200).send(files.map((file) => ({
       id: file._id,
       userId: file.userId,
