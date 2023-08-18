@@ -6,7 +6,6 @@ import dbClient from '../utils/db';
 const { ObjectId } = require('mongodb').ObjectId;
 const Bill = require('bull');
 
-
 class FilesController {
   static async postUpload(req, res) {
     const fileQueue = new Bill('fileQueue');
@@ -114,15 +113,17 @@ class FilesController {
     const files = await dbClient.db.collection('files').aggregate(aggregationData);
     const filesData = [];
     await files.forEach((file) => {
-      filesData.push({
+      const fileItem = {
         id: file._id,
         userId: file.userId,
         name: file.name,
         type: file.type,
         isPublic: file.isPublic,
         parentId: file.parentId,
-      });
+      };
+      filesData.push(fileItem);
     });
+    return res.status(200).send(filesData);
   }
 }
 
