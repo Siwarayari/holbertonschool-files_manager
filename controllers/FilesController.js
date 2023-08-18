@@ -75,6 +75,55 @@ class FilesController {
       parentId: fileDataDb.parentId,
     });
   }
+
+  static async getShow(req, res) {
+    const token = req.header('X-Token') || null;
+    if (!token) return res.status(401).send({ error: 'Unauthorized' });
+    const reditoken = await redisClient.get(`auth_${token}`);
+    if (!reditoken) return res.status(401).send({ error: 'Unauthorized' });
+    const usr = await dbClient.db.collection('users').findOne({ _id: ObjectId(reditoken) });
+    if (!usr) return res.status(401).send({ error: 'Unauthorized' });
+    const idFile = req.params.id;
+    if (!idFile) return res.status(400).send({ error: 'Missing file_id' });
+    const file = await dbClient.db.collection('files').findOne({ _id: ObjectId(idFile), userId: usr._id });
+    if (!file) return res.status(404).send({ error: 'Not found' });
+    return res.status(200).send({
+      id: file._id,
+      userId: file.userId,
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId,
+    });
+  }
+
+  static async getIndex(req, res) {
+    const token = req.header('X-Token') || null;
+    if (!token) return res.status(401).send({ error: 'Unauthorized' });
+    const reditoken = await redisClient.get(`auth_${token}`);
+    if (!reditoken) return res.status(401).send({ error: 'Unauthorized' });
+    const usr = await dbClient.db.collection('users').findOne({ _id: ObjectId(reditoken) });
+    if (!usr) return res.status(401).send({ error: 'Unauthorized' });
+    const parentId = req.query.parentId || 0;
+    if (parentId !== 0) {
+      const parent = await dbClient.db.collection('files').findOne({ _id: ObjectId(parentId) });
+      if (!parent) return res.status(200).send([]);
+      if (parent.type !== 'folder') return res.status(200).send([]);
+    }
+    const page = req.query.page || 0;
+    const limit = req.query.limit || 20;
+    const query = { userId: usr._id, parentId };
+    if (parentId === 0) query.parentId = 0;
+    const files = await dbClient.db.collection('files').find(query).skip(page * limit).limit(limit).toArray();
+    return res.status(200).send(files.map((file) => ({
+      id: file._id,
+      userId: file.userId,
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId,
+    })));
+  }
 }
 
 export default FilesController;
