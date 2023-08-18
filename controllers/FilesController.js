@@ -105,26 +105,24 @@ class FilesController {
     const usr = await dbClient.db.collection('users').findOne({ _id: ObjectId(reditoken) });
     if (!usr) return res.status(401).send({ error: 'Unauthorized' });
     const parentId = req.query.parentId || 0;
-    if (parentId !== 0) {
-      const parent = await dbClient.db.collection('files').findOne({ _id: ObjectId(parentId) });
-      if (!parent) return res.status(200).send([]);
-      if (parent.type !== 'folder') return res.status(200).send([]);
+    const pagination = req.query.page || 0;
+    const matchPage = { $and: [{ parentId }] };
+    let aggregationData = [{ $match: matchPage }, { $skip: pagination * 20 }, { $limit: 20 }];
+    if (parentId === 0) {
+      aggregationData = [{ $match: matchPage }, { $skip: pagination * 20 }, { $limit: 20 }];
     }
-    const page = req.query.page || 0;
-    const limit = req.query.limit || 20;
-    const query = { userId: usr._id, parentId };
-    if (parentId === 0) query.parentId = 0;
-    const files = await dbClient.db.collection('files').find(query).skip(page * limit)
-      .limit(limit)
-      .toArray();
-    return res.status(200).send(files.map((file) => ({
-      id: file._id,
-      userId: file.userId,
-      name: file.name,
-      type: file.type,
-      isPublic: file.isPublic,
-      parentId: file.parentId,
-    })));
+    const files = await dbClient.db.collection('files').aggregate(aggregationData);
+    const filesData = [];
+    await files.forEach((file) => {
+      filesData.push({
+        id: file._id,
+        userId: file.userId,
+        name: file.name,
+        type: file.type,
+        isPublic: file.isPublic,
+        parentId: file.parentId,
+      });
+    });
   }
 }
 
