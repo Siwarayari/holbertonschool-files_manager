@@ -1,7 +1,6 @@
 const { promisify } = require('util');
 const redis = require('redis');
 
-
 class RedisClient {
   constructor() {
     this.client = redis.createClient();

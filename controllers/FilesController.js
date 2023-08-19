@@ -19,19 +19,13 @@ export default class FilesController {
     const validTypes = ['folder', 'file', 'image'];
 
     if (!name) return response.status(400).send({ error: 'Missing name' });
-    if (!type || !validTypes.includes(type)) {
-      return response.status(400).send({ error: 'Missing type' });
-    }
+    if (!type || !validTypes.includes(type)) return response.status(400).send({ error: 'Missing type' });
     if (!data && type !== 'folder') return response.status(400).send({ error: 'Missing data' });
     if (parentId) {
       const query = { _id: ObjectId(parentId) };
       const parent = await dbClient.db.collection('files').findOne(query);
-      if (!parent) {
-        return response.status(400).send({ error: 'Parent not found' });
-      }
-      if (parent.type !== 'folder') {
-        return response.status(400).send({ error: 'Parent is not a folder' });
-      }
+      if (!parent) return response.status(400).send({ error: 'Parent not found' });
+      if (parent.type !== 'folder') return response.status(400).send({ error: 'Parent is not a folder' });
     }
     if (type === 'folder') {
       const document = {
@@ -94,12 +88,18 @@ export default class FilesController {
   static async getShow(request, response) {
     const xToken = request.headers['x-token'];
     const user = await getUser(xToken);
+
     if (!user) return response.status(401).send({ error: 'Unauthorized' });
+
     const fileId = request.params.id;
+
     if (!fileId) return response.status(404).send({ error: 'Not found' });
+
     const query = { _id: ObjectId(fileId), userId: user._id };
     const file = await dbClient.db.collection('files').findOne(query);
+
     if (!file) return response.status(404).send({ error: 'Not found' });
+
     return response.status(200).send({
       id: file._id,
       userId: file.userId,

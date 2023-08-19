@@ -15,6 +15,7 @@ export default class AppController {
       users: await dbClient.nbUsers(),
       files: await dbClient.nbFiles(),
     };
+
     response.status(200).send(stats);
   }
 }

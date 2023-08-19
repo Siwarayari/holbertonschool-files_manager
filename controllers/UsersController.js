@@ -8,9 +8,11 @@ export default class UserController {
   static async postNew(request, response) {
     const userQueue = new Bull('userQueue');
     const { email, password } = request.body;
+
     if (!email) return response.status(400).send({ error: 'Missing email' });
     if (!password) return response.status(400).send({ error: 'Missing password' });
     if (await dbClient.db.collection('users').findOne({ email })) return response.status(400).send({ error: 'Already exist' });
+
     const user = { email, password: sha1(password) };
     const result = await dbClient.db.collection('users').insertOne(user);
     await userQueue.add({
