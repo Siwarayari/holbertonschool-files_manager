@@ -166,7 +166,7 @@ export default class FilesController {
     });
   }
 
-  static async putUnpublish(request, response) {
+  static async putUnPublish(request, response) {
     const xToken = request.headers['x-token'];
     const user = await getUser(xToken);
     if (!user) return response.status(401).send({ error: 'Unauthorized' });
