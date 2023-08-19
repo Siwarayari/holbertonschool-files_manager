@@ -153,7 +153,9 @@ export default class FilesController {
     const file = await dbClient.db.collection('files').findOne(query);
     if (!file) return response.status(404).send({ error: 'Not found' });
     const update = { $set: { isPublic: true } };
-    await dbClient.db.collection('files').updateOne(query, update);
+    await dbClient.db.collection('files').updateOne(query, update, (error) => {
+      if (error) throw error;
+    });
     return response.status(200).send({
       id: file._id,
       userId: file.userId,
@@ -174,7 +176,9 @@ export default class FilesController {
     const file = await dbClient.db.collection('files').findOne(query);
     if (!file) return response.status(404).send({ error: 'Not found' });
     const update = { $set: { isPublic: false } };
-    await dbClient.db.collection('files').updateOne(query, update);
+    await dbClient.db.collection('files').updateOne(query, update, (error) => {
+      if (error) throw error;
+    });
     return response.status(200).send({
       id: file._id,
       userId: file.userId,
