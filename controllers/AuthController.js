@@ -7,12 +7,10 @@ export default class AuthController {
   static async getConnect(request, response) {
     const auth = request.headers.authorization;
     if (!auth) return response.status(401).send({ error: 'Unauthorized' });
-
     const extractAuth = auth.split('Basic ')[1];
     const decodeAuth = Buffer.from(extractAuth, 'base64').toString('utf-8');
     const [email, password] = decodeAuth.split(':');
     if (!email || !password) return response.status(401).send({ error: 'Unauthorized' });
-
     const user = { email, password: sha1(password) };
     const getUser = await dbClient.db.collection('users').findOne(user);
     if (!getUser) return response.status(401).send({ error: 'Unauthorized' });

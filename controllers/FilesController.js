@@ -9,11 +9,9 @@ const { ObjectId } = require('mongodb');
 export default class FilesController {
   static async postUpload(request, response) {
     const fileQueue = new Bull('fileQueue');
-
     const xToken = request.headers['x-token'];
     const user = await getUser(xToken);
     if (!user) return response.status(401).send({ error: 'Unauthorized' });
-
     const {
       name, type, isPublic, data,
     } = request.body;
@@ -97,15 +95,11 @@ export default class FilesController {
     const xToken = request.headers['x-token'];
     const user = await getUser(xToken);
     if (!user) return response.status(401).send({ error: 'Unauthorized' });
-
     const fileId = request.params.id;
     if (!fileId) return response.status(404).send({ error: 'Not found' });
-
     const query = { _id: ObjectId(fileId), userId: user._id };
     const file = await dbClient.db.collection('files').findOne(query);
-
     if (!file) return response.status(404).send({ error: 'Not found' });
-
     return response.status(200).send({
       id: file._id,
       userId: file.userId,
@@ -120,18 +114,15 @@ export default class FilesController {
     const xToken = request.headers['x-token'];
     const user = await getUser(xToken);
     if (!user) return response.status(401).send({ error: 'Unauthorized' });
-
     const parentId = request.query.parentId || 0;
     const page = request.query.page || 0;
     let match;
-
     if (parentId === 0) match = {};
     else {
       match = {
         parentId: parentId === '0' ? Number(parentId) : ObjectId(parentId),
       };
     }
-
     const limit = 20;
     const skip = page * limit;
     const filesList = await dbClient.db.collection('files').aggregate([
@@ -141,7 +132,6 @@ export default class FilesController {
       { $skip: skip },
       { $limit: limit },
     ]).toArray();
-
     const resultList = filesList.map((file) => ({
       id: file._id,
       userId: file.userId,
@@ -150,7 +140,6 @@ export default class FilesController {
       isPublic: file.isPublic,
       parentId: file.parentId,
     }));
-
     return response.status(200).send(resultList);
   }
 }

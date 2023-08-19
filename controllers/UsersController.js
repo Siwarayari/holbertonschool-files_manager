@@ -7,7 +7,6 @@ import redisClient from '../utils/redis';
 export default class UserController {
   static async postNew(request, response) {
     const userQueue = new Bull('userQueue');
-
     const { email, password } = request.body;
     if (!email) return response.status(400).send({ error: 'Missing email' });
     if (!password) return response.status(400).send({ error: 'Missing password' });

@@ -1,8 +1,5 @@
 import { MongoClient } from 'mongodb';
 
-const { ObjectID } = require('mongodb');
-
-// constructor that creates a client to MongoDB
 class DBClient {
   constructor() {
     const host = process.env.DB_HOST || 'localhost';
@@ -10,9 +7,7 @@ class DBClient {
     const database = process.env.DB_DATABASE || 'files_manager';
     const url = `mongodb://${host}:${port}`;
     this.status = false;
-
     const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
-
     client.connect((error) => {
       if (error) {
         this.status = false;

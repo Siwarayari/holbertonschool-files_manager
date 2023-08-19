@@ -15,6 +15,7 @@ router.get('/files/:id', FilesController.getShow);
 router.get('/files', FilesController.getIndex);
 
 router.use(express.json());
+
 router.post('/users', UserController.postNew);
 router.post('/files', FilesController.postUpload);
 

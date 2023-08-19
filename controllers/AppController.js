@@ -18,4 +18,3 @@ export default class AppController {
     response.status(200).send(stats);
   }
 }
-
