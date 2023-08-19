@@ -5,19 +5,19 @@ import FilesController from '../controllers/FilesController';
 
 const express = require('express');
 
-const router = express.Router();
-
-router.use(express.json());
-
-router.get('/status', AppController.getStatus);
-router.get('/stats', AppController.getStats);
-router.get('/users/me', UsersController.getMe);
-router.get('/connect', AuthController.getConnect);
-router.get('/disconnect', AuthController.getDisconnect);
-router.get('/files/:id', FilesController.getShow);
-router.get('/files', FilesController.getIndex);
-
-router.post('/users', UsersController.postNew);
-router.post('/files', FilesController.postUpload);
+const router = (app) => {
+  const paths = express.Router();
+  app.use(express.json());
+  app.use('/', paths);
+  paths.get('/status', ((request, response) => AppController.getStatus(request, response)));
+  paths.get('/stats', ((request, response) => AppController.getStats(request, response)));
+  paths.post('/users', ((request, response) => UsersController.postNew(request, response)));
+  paths.get('/connect', ((request, response) => AuthController.getConnect(request, response)));
+  paths.get('/disconnect', ((request, response) => AuthController.getDisconnect(request, response)));
+  paths.get('/users/me', ((request, response) => UsersController.getMe(request, response)));
+  paths.post('/files', ((request, response) => FilesController.postUpload(request, response)));
+  paths.get('/files/:id', ((request, response) => FilesController.getShow(request, response)));
+  paths.get('/files', ((request, response) => FilesController.getIndex(request, response)));
+};
 
 export default router;
