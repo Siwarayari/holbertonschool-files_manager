@@ -5,6 +5,7 @@ import dbClient from '../utils/db';
 const Bull = require('bull');
 const { v4: uuidv4 } = require('uuid');
 const { ObjectId } = require('mongodb');
+const mime = require('mime-types');
 
 export default class FilesController {
   static async postUpload(request, response) {
@@ -187,5 +188,38 @@ export default class FilesController {
       isPublic: false,
       parentId: file.parentId,
     });
+  }
+
+  static async getFile(request, response) {
+    const fileID = request.params.id || '';
+    if (fileID === '') return response.status(404).send({ error: 'not found' });
+
+    const size = request.query.size || 0;
+
+    const query = { _id: ObjectId(fileID) };
+
+    const file = await dbClient.db.collection('files').findOne(query);
+    if (!file) return response.status(404).send({ error: 'Not found' });
+
+    const path = size === 0 ? file.localPath : `${file.localPath}_${size}`;
+
+    if (!file.isPublic) {
+      const xToken = request.headers['x-token'];
+      const user = await getUser(xToken);
+      if (!user || user._id.toString() !== file.userId.toString()) {
+        return response.status(404).send({ error: 'Not found' });
+      }
+    }
+
+    if (file.type === 'folder') return response.status(400).send({ error: 'A folder doesn\'t have content' });
+
+    try {
+      const typOfMime = mime.lookup(file.name);
+      response.setHeader('Content-Type', typOfMime);
+      const dataToRead = fs.readFileSync(path);
+      return response.status(200).send(dataToRead);
+    } catch (error) {
+      return response.status(404).send({ error: 'not found' });
+    }
   }
 }
